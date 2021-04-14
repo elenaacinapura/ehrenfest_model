@@ -50,3 +50,14 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Build directory
+build/
+
+# Various output files
+*.pdf
+*.png
+*.csv
+.vscode
+*.eps
+*.tex
