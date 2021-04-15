@@ -1,0 +1,3 @@
+[submodule "extern/computational_physics_lib"]
+	path = extern/computational_physics_lib
+	url = git@github.com:elenaacinapura/computational_physics_lib.git
