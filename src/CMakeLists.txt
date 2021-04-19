@@ -9,3 +9,12 @@ add_custom_target(run
     DEPENDS main
     WORKING_DIRECTORY ${CMAKE_PROJECT_DIR}
 )
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/frequency.py
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+add_custom_target(plot
+    COMMAND python frequency.py
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/frequency.csv
+    WORKING_DIRECTORY ${CMAKE_PROJECT_DIR}
+)
