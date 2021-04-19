@@ -35,4 +35,4 @@ will run the C executables that do the simulation. Then,
 ```
 make plot
 ```
-will execute the python scripts to output significant plots of the simulation jst performed. Don't complain if the plots seem ugly, I will work on that later.
+will execute the python scripts to output significant plots of the simulation just performed. Don't complain if the plots seem ugly, I will work on that later.
