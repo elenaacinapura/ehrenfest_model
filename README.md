@@ -1,6 +1,13 @@
 # Ehrenfest model simulation
 
-Simulation of the Ehrenfest urn problem using Markov chains. The simulations are written in C language and plots are drawn with Python's Matplotlib.
+Simulations of the Ehrenfest urn problem using Markov chains. The simulations are written in C language and plots are drawn with Python's Matplotlib.
+
+## Details about the simulations
+The Ehrenfest urn problem consists in the following situation: you have two boxes and N particles distributed in them. At regular timesteps, you select a particle at random and move it to a certain box. The spefic rules depend on the variation of the Ehrenfest model that is being considered:
+- Basic Ehrenfest problem: at each time step, you select a particle at random and move it to the other box
+- Modified Ehrenfest problem: at each time step, you select a particle at random and a box at random, and move the particle to that box
+
+The code in this repository will run simulations for both the models.
 
 ## Requirements
 The code in this repository is built using CMake and requires the following C libraries:
@@ -8,13 +15,16 @@ The code in this repository is built using CMake and requires the following C li
     ```
     sudo apt install libgsl-dev
     ```
-- Basic Linear Algebra Subroutines (BLAS). You can install it on Ubuntu with 
+- Basic Linear Algebra Subroutines (BLAS), specifically the OpenBLAS implementation. You can install it on Ubuntu with 
   ```
-  sudo apt install libblas-dev
+  sudo apt install libopenblas-dev
   ```
 Furthermore, it uses Python 3 for graphical representation.
 
-This repository includes another repository as a submodule, which is found in the directory `extern`. Make sure to synchronize it too, when downloading this repository (search on Google how to do it if it doesn't work).
+This repository includes another repository as a submodule, which is found in the directory `extern`. Make sure to download it too, cloning this repository with 
+```
+git clone --recurse-submodules <link_to_repo>
+```
 
 ## Compiling
 To compile the source files, use the following commands from the uppermost level of the repository:
@@ -26,13 +36,7 @@ make -j
 ```
 
 ## Running
-If compilation ends successfully, you can run the simulation using the following commands from inside the directory `build`.
-
-```
-make run
-```
-will run the C executables that do the simulation. Then,
-```
-make plot
-```
-will execute the python scripts to output significant plots of the simulation just performed. Don't complain if the plots seem ugly, I will work on that later.
+If compilation ends successfully, you can run the simulation using the following commands from inside the directory `build`:
+- `make run-plot-basic` will run the simulation AND display the plots for the basic Ehrenfest problem
+- `make run-plot-modified` will run the simulation AND display the plots for the modified Ehrenfest problem
+- you can also separate the phases of simulation and plotting by executing `make run-basic` and then `make plot-basic` for the basic problem, and by executing `make run-modified` and then `make plot-modified` for the modified problem
