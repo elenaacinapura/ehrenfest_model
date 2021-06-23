@@ -2,6 +2,20 @@
 #define __FUNCTIONS_H__
 
 #include <stdbool.h>
+#include <gsl/gsl_rng.h>
+
+void initialize_simulation (int N, int x0, bool box[], int *x, double frequency[]) ;
+
+void simulation_step(int N, bool box[], int *x, gsl_rng *r);
+
+double distance(int N, double d[], double ld[]);
+
+void normalize (int N, double d[]);
+
+unsigned long binomial(unsigned long n, unsigned long k);
+
+void fill_limiting_distribution(int N, double ld[]);
+
 /** 
  * @brief Fill stochastic matrix P for an Ehrenfest problem.
  * 

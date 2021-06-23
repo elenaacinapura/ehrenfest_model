@@ -11,11 +11,12 @@ T_single = parameters['T_single'][0]
 T_mult = parameters['T_mult'][0]
 n_rep = parameters['n_rep'][0]
 
+
 # Create bins for histogram
 bins = [i-0.5 for i in range(N+1)]
 pts = [i for i in range(N+1)]
 
-# Probabilities, time spent,return time
+# Probabilities and time spent
 prob_th = pd.read_csv('modified_prediction.csv', delimiter='\t')
 prob_th = prob_th['prob'].to_numpy()
 
@@ -28,7 +29,7 @@ time_spent = time_spent['times'].to_numpy()
 avg_ret = pd.read_csv('return.csv', delimiter='\t')
 avg_ret = avg_ret['time'].to_numpy()
 
-# Limiting distribution and mean return time
+# Limiting distribution
 lim = []
 for i in range(N+1):
     lim.append(scipy.special.binom(N, i) * (0.5)**N)
@@ -37,19 +38,21 @@ avg_ret_th = []
 for i in range(N+1):
     avg_ret_th.append(2**N / scipy.special.binom(N, i))
 
+
 # Plot 1
-plt.figure("Modified Ehrenfest model - Probability")
-plt.title("Probability distribution after {} time steps\nwith N = {}".format(T_mult, N))
+plt.figure("Modified Ehrenfest Chain - Probability")
+plt.title("Probability distribution after {} time steps".format(T_mult))
 
 plt.hist(bins, weights=prob_th, label='Prediction', color='b', alpha=0.5, ec='k')
-plt.hist(bins, weights=prob_sim, label='Simulation',alpha=0.5, ls='dashed', density=1, color='r', ec='k')
+plt.hist(bins, weights=prob_sim, label='Simulation', alpha=0.5, density=1, color='r', ec='k', ls='dashed')
 
 plt.xlabel("Number of particles in the box")
 plt.ylabel("Probability")
 plt.legend()
 
+
 # Plot 2
-plt.figure("Modified Ehrenfest Model - Limiting distribution")
+plt.figure("Modified Ehrenfest Chain - Limiting distribution")
 plt.title("Time spent in each configuration after {} time steps".format(T_single))
 plt.hist(bins, weights=time_spent, density=1, label='Simulation', alpha=0.5, ec='k', color='orange')
 plt.hist(bins, weights=lim, label='Limiting distribution', ls='dashed', color='darkgreen', alpha=0.5, ec='k')
@@ -59,7 +62,7 @@ plt.ylabel("Time spent")
 plt.legend()
 
 #Plot 3
-plt.figure("Modified Ehrenfest Model - Average return time")
+plt.figure("Modified Ehrenfest Chain - Average return time")
 plt.title("Average return time")
 
 plt.hist(bins, weights=avg_ret, label='Simulation', alpha=0.5, ec='k', color='blue')
@@ -69,3 +72,5 @@ plt.xlabel("State")
 plt.ylabel("Time")
 plt.legend()
 plt.show()
+
+print("***********************************************************\n")

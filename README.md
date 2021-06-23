@@ -6,8 +6,8 @@
 
 ## Details about the simulations
 The Ehrenfest urn problem consists in the following situation: you have two boxes and N particles distributed between them. At regular timesteps, you select a particle at random and move it to a certain box. The spefic rules depend on the variation of the Ehrenfest model that is being considered:
-- **Basic Ehrenfest problem**: at each time step, you select a particle at random and move it to the other box
-- **Modified Ehrenfest problem**: at each time step, you select a particle at random and a box at random, and move the particle to that box
+- **Basic Ehrenfest problem**: at each time step, you select a particle at random and a box at random, and move the particle to that box
+- **Modified Ehrenfest problem**: at each time step, you select a particle at random and move it to the other box
 
 The code in this repository will run simulations for both models, and draw plots comparing the theoretical prediction and the simulation outcome for the following quantities:
 - Probability distribution after T timesteps

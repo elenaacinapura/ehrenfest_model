@@ -13,8 +13,10 @@
 int main() {
 	/* Welcome */
 	printf("\n***********************************************************\n");
-	printf("EHRENFEST MODEL SIMULATION\nBasic model\n\n");
+	printf("EHRENFEST URN PROBLEM SIMULATION\n");
+	printf("***********************************************************\n");
 	printf("Simulating...\n\n");
+
 	/*************************************************************************
 	 * PARAMETERS
 	 * ***********************************************************************
@@ -25,8 +27,8 @@ int main() {
 	 * ***********************************************************************
 	 */
 	int N = 10;
-	int T_single = 100;
-	int T_mult = 10000;
+	int T_single = 100000000;
+	int T_mult = 100;
 	int N_REP = 10000;
 	int x0 = 1;
 
@@ -40,13 +42,16 @@ int main() {
 	 * occupation_cnt = current number of particle in box 0
 	 * count[i] = how many times box 0 had i particles after T timesteps
 	 * time_spent[i] = time spent with i particles in box 0
+	 * last_hit_time[i] = last hitting time of state i
+	 * avg_ret_time[i] = average return time to state i
+	 * hitting_cnt = number of times the system hit the state i
 	 * ***********************************************************************
 	 */
 	bool box[N];
 	int occupation_cnt;
 	int count[N + 1];
 	int time_spent[N + 1];
-    int last_hit_time[N + 1];
+	int last_hit_time[N + 1];
 	double avg_ret_time[N + 1];
 	int hitting_cnt[N + 1];
 	/**-----------------------------------
@@ -68,7 +73,7 @@ int main() {
 	for (int i = 0; i <= N; i++) {
 		count[i] = 0;
 		time_spent[i] = 0;
-        avg_ret_time[i] = 0;
+		avg_ret_time[i] = 0;
 		hitting_cnt[i] = 0;
 		last_hit_time[i] = 0;
 	}
@@ -80,24 +85,27 @@ int main() {
 	}
 	occupation_cnt = x0;
 	time_spent[x0]++;
-    last_hit_time[x0] = 0;
+	last_hit_time[x0] = 0;
 	hitting_cnt[x0] = 1;
 	/**--------------------
 	 * Run for T timesteps
 	 * --------------------
 	 */
-	int chosen;
-	for (int t = 0; t < T_mult; t++) {
-		chosen = gsl_rng_uniform_int(r, N); /* Pick a particle at random */
-		if (box[chosen] == 0) {
-			occupation_cnt--;
-		} else {
-			occupation_cnt++;
+	int random_part, random_box;
+	for (int t = 0; t < T_single; t++) {
+		random_part = gsl_rng_uniform_int(r, N); /* Pick a particle at random */
+		random_box = gsl_rng_uniform_int(r, 2);	 /* Pick a box at random */
+		if (box[random_part] != random_box) {
+			if (random_box == 0) {
+				occupation_cnt++;
+			} else {
+				occupation_cnt--;
+			}
+			box[random_part] = !box[random_part]; /* Change box */
 		}
 		assert(occupation_cnt >= 0 && occupation_cnt <= N);
-		box[chosen] = !box[chosen]; /* Change box */
 		time_spent[occupation_cnt]++;
-        hitting_cnt[occupation_cnt]++;
+		hitting_cnt[occupation_cnt]++;
 
 		if (hitting_cnt[occupation_cnt] > 1) {
 			avg_ret_time[occupation_cnt] += (double)(t - last_hit_time[occupation_cnt]);
@@ -105,10 +113,10 @@ int main() {
 		last_hit_time[occupation_cnt] = t;
 	}
 
-    for (int i = 0; i < N + 1; i++) {
-        if (hitting_cnt[i] > 1) {
-		    avg_ret_time[i] /= hitting_cnt[i] - 1;
-        }
+	for (int i = 0; i < N + 1; i++) {
+		if (hitting_cnt[i] > 1) {
+			avg_ret_time[i] /= hitting_cnt[i] - 1;
+		}
 	}
 
 	/**************************************************************
@@ -116,7 +124,7 @@ int main() {
 	 **************************************************************
 	 */
 	/**--------------------
-	 * Initialize count[]
+	 * Initialize vectors
 	 * --------------------
 	 */
 	for (int i = 0; i <= N; i++) {
@@ -127,27 +135,35 @@ int main() {
 		 * Set initial conditions
 		 * -----------------------
 		 */
-		occupation_cnt = x0;
 		for (int i = 0; i < x0; i++) {
 			box[i] = 0;
 		}
 		for (int i = x0; i < N; i++) {
 			box[i] = 1;
 		}
+		for (int i = 0; i < N + 1; i++) {
+			hitting_cnt[i] = 0;
+			last_hit_time[i] = 0;
+		}
+		occupation_cnt = x0;
+
 		/**--------------------
 		 * Run for T timesteps
 		 * --------------------
 		 */
-		int chosen;
+		int random_part, random_box;
 		for (int t = 0; t < T_mult; t++) {
-			chosen = gsl_rng_uniform_int(r, N); /* Pick a particle at random */
-			if (box[chosen] == 0) {
-				occupation_cnt--;
-			} else {
-				occupation_cnt++;
+			random_part = gsl_rng_uniform_int(r, N); /* Pick a particle at random */
+			random_box = gsl_rng_uniform_int(r, 2);	 /* Pick a box at random */
+			if (box[random_part] != random_box) {
+				if (random_box == 0) {
+					occupation_cnt++;
+				} else {
+					occupation_cnt--;
+				}
+				box[random_part] = !box[random_part]; /* Change box */
 			}
 			assert(occupation_cnt >= 0 && occupation_cnt <= N);
-			box[chosen] = !box[chosen]; /* Change box */
 		}
 		count[occupation_cnt]++;
 	}
@@ -170,7 +186,7 @@ int main() {
 	}
 	f[x0] = 1.0;
 
-	initialize_P(N, P, 0);
+	initialize_P(N, P, 1);
 
 	theoretical_prediction(N, f, P, T_mult);
 
@@ -216,7 +232,7 @@ int main() {
 	}
 	fclose(f_time);
 
-    /* Return time */
+	/* Return time */
 	FILE *f_ret;
 	f_ret = fopen("return.csv", "w");
 	assert(f_ret != NULL);
@@ -227,6 +243,6 @@ int main() {
 	fclose(f_ret);
 
 	/* Bye-bye */
-	printf("Simulation ended successfully.\nPrinting plots.\n");
-	printf("***********************************************************\n\n");
+	printf("Simulation ended successfully.\n");
+	printf("Now showing the plots.\n");
 }
