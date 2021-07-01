@@ -5,14 +5,19 @@
 #include <assert.h>
 #include <cblas.h>
 #include <gsl/gsl_rng.h>
+#include <gsl/gsl_sf_gamma.h>
 #include <limits.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 
-void initialize_simulation(int N, int x0, bool box[], int *x, double distribution[]) {
+void initialize_simulation(int N, int x0, bool box[], int *x, double distribution[], int last_hit_time[],
+			   double avg_return_time[], int times_returning[]) {
 	for (int i = 0; i <= N; i++) {
 		distribution[i] = 0.0;
+		last_hit_time[i] = -1;
+		avg_return_time[i] = 0.0;
+		times_returning[i] = 0;
 	}
 	for (int i = 0; i < N; i++) {
 		if (i < x0) {
@@ -42,7 +47,7 @@ void simulation_step(int N, bool box[], int *x, gsl_rng *r) {
 double distance(int N, double d[], double ld[]) {
 	double sum = 0.0;
 	for (int i = 0; i <= N; i++) {
-		sum += fabs(d[i] - ld[i]);
+		sum += pow(fabs(d[i] - ld[i]), 2);
 	}
 	return sum;
 }
@@ -84,23 +89,36 @@ void initialize_P(int N, double P[N + 1][N + 1], bool modified) {
 	}
 }
 
-unsigned long binomial(unsigned long n, unsigned long k) {
-	unsigned long c = 1, i;
-	if (k > n - k) { // take advantage of symmetry
-		k = n - k;
+
+double Ln_Gamma_Function(double x) {
+	return gsl_sf_lngamma(x);
+}
+
+double Binomial_Point_Distribution(int n, int k, double p) {
+	if (k < 0 || k > n){
+		return 0.0;
 	}
-	for (i = 1; i <= k; i++, n--) {
-		if (c / i > UINT_MAX / n) { // return 0 on overflow
-			return 0;
+	if (p == 0.0){
+		if (k == 0) {
+			return 1.0;
+		} else {
+			return 0.0;
 		}
-		c = c / i * n + c % i * n / i; // split c * n / i into (c / i * i + c % i) * n / i
 	}
-	return c;
+	if (p == 1.0) {
+		if (k == n) {
+			return 1.0;
+		} else {
+			return 0.0;
+		}
+	}
+	return exp(Ln_Gamma_Function((double)(n + 1)) - Ln_Gamma_Function((double)(k + 1)) -
+		   Ln_Gamma_Function((double)(n - k + 1)) + (double)k * log(p) + (double)(n - k) * log(1.0 - p));
 }
 
 void fill_limiting_distribution(int N, double ld[]) {
 	for (int i = 0; i <= N; i++) {
-		ld[i] = pow(0.5, N) * binomial(N, i);
+		ld[i] = Binomial_Point_Distribution(N, i, 0.5);
 	}
 }
 
