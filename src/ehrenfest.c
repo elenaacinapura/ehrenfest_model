@@ -18,20 +18,21 @@ int main() {
 	 * PARAMETERS
 	 * ***********************************************************************
 	 * N = number of particles
-	 * SAMPLING_STEPS = number of time steps of the sampling phase
+	 * T = number of time steps
 	 * x0 = number of particles in box 0 at t = 0
 	 * ***********************************************************************
 	 */
-	int N = 100;
+	int N = 50;
 	int x0 = N;
+	int T = 1e7;
 
 	/*************************************************************************
 	 * VARIABLES
 	 * ***********************************************************************
 	 * box[i] 				box where particle i is
 	 * x 					state of the system, number of particle in box 0
-	 * distribution[i] 		number of instants spent in state i
-	 * normalized_dist[i]	same as distribution[i], but normalized
+	 * visits[i] 			number of instants spent in state i
+	 * normalized_dist[i]	same as visits[i], but normalized
 	 * last_hit_time[i] 	last hitting time of state i
 	 * avg_ret_time[i] 		average return time to state i
 	 * times_returned[i]	number of times that system returned to state i
@@ -39,7 +40,7 @@ int main() {
 	 */
 	bool box[N];
 	int x;
-	double distribution[N + 1];
+	double visits[N + 1];
 	double normalized_dist[N + 1];
 	double limiting_dist[N + 1];
 	int last_hit_time[N + 1];
@@ -58,7 +59,7 @@ int main() {
 	/*************************************************************************/
 	/* Set initial conditions */
 	/*************************************************************************/
-	initialize_simulation(N, x0, box, &x, distribution, last_hit_time, avg_return_time, times_returned);
+	initialize_simulation(N, x0, box, &x, visits, last_hit_time, avg_return_time, times_returned);
 	fill_limiting_distribution(N, limiting_dist);
 
 	/*************************************************************************/
@@ -92,8 +93,8 @@ int main() {
 		simulation_step(N, box, &x, r);
 
 		/* Update distributions*/
-		distribution[x] += 1.0;
-		vec_copy(N + 1, distribution, normalized_dist);
+		visits[x] += 1.0;
+		vec_copy(N + 1, visits, normalized_dist);
 		normalize(N, normalized_dist);
 
 		/* Update hitting time */
@@ -108,22 +109,21 @@ int main() {
 
 		/* Print info about the current iteration */
 		if (t % 100 == 0) {
-			printf("\r\tt = %d delta = %.3lf", t, distance_from_limit);
+			printf("\r\tt = %d D = %.3lf", t, distance_from_limit);
 		}
 		fprintf(f, "%d\t%lf\n", t, distance_from_limit);
-		
 
-	} while (distance_from_limit > EPS); 
+	} while (t < T); // distance_from_limit > EPS
 	fclose(f);
 
 	for (int i = 0; i <= N; i++) {
-		if (times_returned[i] == 0) {
-			avg_return_time[i] = __DBL_MAX__;
+		if (times_returned[i] < 1) {
+			avg_return_time[i] = 0;
+		} else {
+			avg_return_time[i] = (double)(avg_return_time[i]) / times_returned[i];
 		}
-		avg_return_time[i] = (double)(avg_return_time[i]) / times_returned[i];
 	}
 
-	
 	f = fopen("limiting_dist.csv", "w");
 	fprintf(f, "i\tval\n");
 	for (int i = 0; i <= N; i++) {
