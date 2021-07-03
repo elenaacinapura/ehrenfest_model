@@ -1,5 +1,5 @@
 add_executable(ehrenfest ehrenfest.c functions.c)
-target_compile_options(ehrenfest PRIVATE -Wall -O3 -march=native -ffast-math)
+target_compile_options(ehrenfest PRIVATE -Wall -O3 -march=native)
 target_link_libraries(ehrenfest compphy-lib blas gsl)
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/ehrenfest.py

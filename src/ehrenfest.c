@@ -22,7 +22,7 @@ int main() {
 	 * x0 = number of particles in box 0 at t = 0
 	 * ***********************************************************************
 	 */
-	int N = 50;
+	int N = 30;
 	int x0 = N;
 	int T = 1e7;
 
@@ -32,19 +32,20 @@ int main() {
 	 * box[i] 				box where particle i is
 	 * x 					state of the system, number of particle in box 0
 	 * visits[i] 			number of instants spent in state i
-	 * normalized_dist[i]	same as visits[i], but normalized
-	 * last_hit_time[i] 	last hitting time of state i
-	 * avg_ret_time[i] 		average return time to state i
-	 * times_returned[i]	number of times that system returned to state i
+	 * visit_freq[i]		same as visits[i], but normalized
+	 * last_visit[i] 		last hitting time of state i
+	 * recurrence_time[i] 	average return time to state i
+	 * times_returned[i]	number of times that system returned to state i 
+	 * 						(basically visit[i]-1)
 	 * ***********************************************************************
 	 */
 	bool box[N];
 	int x;
 	double visits[N + 1];
-	double normalized_dist[N + 1];
+	double visit_freq[N + 1];
 	double limiting_dist[N + 1];
-	int last_hit_time[N + 1];
-	double avg_return_time[N + 1];
+	int last_visit[N + 1];
+	double recurrence_time[N + 1];
 	int times_returned[N + 1];
 
 	FILE *f;
@@ -59,7 +60,7 @@ int main() {
 	/*************************************************************************/
 	/* Set initial conditions */
 	/*************************************************************************/
-	initialize_simulation(N, x0, box, &x, visits, last_hit_time, avg_return_time, times_returned);
+	initialize_simulation(N, x0, box, &x, visits, last_visit, recurrence_time, times_returned);
 	fill_limiting_distribution(N, limiting_dist);
 
 	/*************************************************************************/
@@ -76,13 +77,6 @@ int main() {
 	int t = -1;
 	double distance_from_limit;
 
-	/*********************************
-	 * Converging phase
-	 *********************************
-	 */
-	printf("**************************************\n");
-	printf("Converging phase\n");
-
 	f = fopen("distance.csv", "w");
 	fprintf(f, "t\tdist\n");
 
@@ -94,18 +88,18 @@ int main() {
 
 		/* Update distributions*/
 		visits[x] += 1.0;
-		vec_copy(N + 1, visits, normalized_dist);
-		normalize(N, normalized_dist);
+		vec_copy(N + 1, visits, visit_freq);
+		normalize(N, visit_freq);
 
 		/* Update hitting time */
-		if (last_hit_time[x] != -1) {
-			avg_return_time[x] += t - last_hit_time[x];
+		if (last_visit[x] != -1) {
+			recurrence_time[x] += t - last_visit[x];
 			times_returned[x]++;
 		}
-		last_hit_time[x] = t;
+		last_visit[x] = t;
 
 		/* Calculate the distance from the limit distribution */
-		distance_from_limit = distance(N, normalized_dist, limiting_dist);
+		distance_from_limit = distance(N, visit_freq, limiting_dist);
 
 		/* Print info about the current iteration */
 		if (t % 100 == 0) {
@@ -116,11 +110,12 @@ int main() {
 	} while (t < T); // distance_from_limit > EPS
 	fclose(f);
 
+	/* Final calculation of the mean recurrence time */
 	for (int i = 0; i <= N; i++) {
 		if (times_returned[i] < 1) {
-			avg_return_time[i] = 0;
+			recurrence_time[i] = -1;
 		} else {
-			avg_return_time[i] = (double)(avg_return_time[i]) / times_returned[i];
+			recurrence_time[i] = (double)(recurrence_time[i]) / times_returned[i];
 		}
 	}
 
@@ -131,21 +126,21 @@ int main() {
 	}
 	fclose(f);
 
-	f = fopen("distribution.csv", "w");
+	f = fopen("visit_freq.csv", "w");
 	fprintf(f, "i\tval\n");
 	for (int i = 0; i <= N; i++) {
-		fprintf(f, "%d\t%lf\n", i, normalized_dist[i]);
+		fprintf(f, "%d\t%lf\n", i, visit_freq[i]);
 	}
 	fclose(f);
 
-	f = fopen("avg_return_time_sampled.csv", "w");
+	f = fopen("recurrence_time_sampled.csv", "w");
 	fprintf(f, "i\tval\n");
 	for (int i = 0; i <= N; i++) {
-		fprintf(f, "%d\t%lf\n", i, avg_return_time[i]);
+		fprintf(f, "%d\t%lf\n", i, recurrence_time[i]);
 	}
 	fclose(f);
 
-	f = fopen("avg_return_time_th.csv", "w");
+	f = fopen("recurrence_time_th.csv", "w");
 	fprintf(f, "i\tval\n");
 	for (int i = 0; i <= N; i++) {
 		fprintf(f, "%d\t%lf\n", i, 1.0 / limiting_dist[i]);
