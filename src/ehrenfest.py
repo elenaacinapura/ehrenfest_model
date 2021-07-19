@@ -52,8 +52,6 @@ b = [i for i in range(N)]
 # plt.figure('evolution')
 # plt.hist(i[:N], bins=b, weights=limiting_dist, label='Limiting distribution', color='b', alpha=0.5, ec='k')
 # plt.hist(i[:N], bins=b, weights=dist, label='Simulation visit frequency',alpha=0.5, ls='dashed', density=1, color='r', ec='k')
-# # plt.plot(b, limiting_dist, '.', label='Prediction', color='b', marker=6)
-# # plt.plot(b, dist, '.', label='Simulation', color='r', marker='*')
 # plt.xlabel('State')
 # plt.ylabel('Probability')
 # plt.legend(bbox_to_anchor=(0.83, -0.18))
@@ -64,16 +62,16 @@ b = [i for i in range(N)]
 ###########################################################################
 # LIMITING DISTRIBUTION
 ###########################################################################
-x = 8
-plt.figure('recurrence_{}'.format(N-1), figsize=(6.4, 6.0))
-plt.plot(b, ret_time_th, '.', label='Prediction', color='royalblue', marker='X', markersize=10)
-plt.plot(b, ret_time_sampled, '.', label='Simulation', color='red', marker='.', markersize=10)
-plt.xlabel('State')
-plt.ylabel('Time steps')
-plt.yscale('log')
-plt.legend(bbox_to_anchor=(0.7, -0.14))
-plt.tight_layout()
-plt.subplots_adjust(top=0.950, bottom=0.290, left=0.135, right=0.963, wspace=0.2, hspace=0.2)
-plt.savefig('/media/Dati/Git/thesis_ehrenfest_model/sections/recurrence_{}.eps'.format(N-1), format='eps')
-plt.show()
+# x = 8
+# plt.figure('recurrence_{}'.format(N-1), figsize=(6.4, 6.0))
+# plt.plot(b, ret_time_th, '.', label='Prediction', color='royalblue', marker='X', markersize=10)
+# plt.plot(b, ret_time_sampled, '.', label='Simulation', color='red', marker='.', markersize=10)
+# plt.xlabel('State')
+# plt.ylabel('Time steps')
+# plt.yscale('log')
+# plt.legend(bbox_to_anchor=(0.7, -0.14))
+# plt.tight_layout()
+# plt.subplots_adjust(top=0.950, bottom=0.290, left=0.135, right=0.963, wspace=0.2, hspace=0.2)
+# plt.savefig('/media/Dati/Git/thesis_ehrenfest_model/sections/recurrence_{}.eps'.format(N-1), format='eps')
+# plt.show()
 print( )
