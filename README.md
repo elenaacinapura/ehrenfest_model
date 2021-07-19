@@ -11,7 +11,7 @@ The code in this repository simulates this model and draws plots comparing the t
 - Visit frequency and limiting distribution
 - Mean recurrence time
 
-The simulations are written in the C language and plots are drawn with Python's Matplotlib. 
+The simulation is written in the C language and plots are drawn with Python's Matplotlib. 
 
 ## Requirements
 The code in this repository is built using CMake and requires the following C libraries:
